@@ -1,18 +1,5 @@
 import { Link, useParams } from "react-router";
 import { Plus } from "lucide-react";
-export type TaskProjectDataType = {
-  description: string;
-  id: number;
-  projectId: number;
-  status: string;
-  title: string;
-};
-export type ProjectDetailsDataType = {
-  id: number;
-  title: string;
-  description: string;
-  tasks: TaskProjectDataType[];
-};
 
 export default function ShowPorjectPage() {
   const params = useParams();

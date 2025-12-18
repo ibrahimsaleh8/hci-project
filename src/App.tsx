@@ -1,12 +1,6 @@
 import { Link } from "react-router";
 import { Plus } from "lucide-react";
 import { useState } from "react";
-export type ProjectDataType = {
-  id: number;
-  title: string;
-  description: string;
-  tasksCount: number;
-};
 
 function App() {
   const [searchTxt, setSearchTxt] = useState("");
