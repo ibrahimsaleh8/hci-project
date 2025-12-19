@@ -1,6 +1,11 @@
 import { Link } from "react-router";
+import ProjectCard from "./components/ProjectCard";
 import { Plus } from "lucide-react";
-import { useState } from "react";
+import axios from "axios";
+import { MainDomain } from "./components/ApiDomain";
+import { useEffect, useMemo, useState } from "react";
+import { ShowToast } from "./components/Toast";
+import Loader from "./components/Loader";
 export type ProjectDataType = {
   id: number;
   title: string;
@@ -8,9 +13,42 @@ export type ProjectDataType = {
   tasksCount: number;
 };
 
+async function getAllProjects(): Promise<ProjectDataType[]> {
+  const res = await axios.get(`${MainDomain}/projects`);
+  return res.data;
+}
 function App() {
+  const [projects, setProjects] = useState<ProjectDataType[] | null>(null);
+  const [loading, setLoading] = useState(true);
   const [searchTxt, setSearchTxt] = useState("");
-  console.log("searchTxt ", searchTxt);
+  useEffect(() => {
+    getAllProjects()
+      .then((data) => {
+        setProjects(data);
+      })
+      .catch((err) => {
+        console.log("Error ", err);
+        ShowToast.fire({
+          title: "Fetching Error",
+          icon: "error",
+        });
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, []);
+
+  const projectsData = useMemo(() => {
+    if (projects) {
+      return searchTxt.trim().length > 0
+        ? projects.filter((p) =>
+            p.title.toLowerCase().includes(searchTxt.toLowerCase())
+          )
+        : projects;
+    }
+    return null;
+  }, [projects, searchTxt]);
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center gap-4 justify-between flex-wrap">
@@ -31,7 +69,25 @@ function App() {
         />
       </div>
 
-      <div className="flex gap-5 flex-wrap">Projects</div>
+      <div className="flex gap-5 flex-wrap">
+        {loading && !projectsData ? (
+          <div className="flex items-center justify-center">
+            <Loader />
+          </div>
+        ) : (
+          projectsData && (
+            <>
+              {projectsData.length > 0 ? (
+                projectsData.map((project) => (
+                  <ProjectCard projectData={project} key={project.id} />
+                ))
+              ) : (
+                <p className="text-2xl font-medium">No Projects Found...</p>
+              )}
+            </>
+          )
+        )}
+      </div>
     </div>
   );
 }
